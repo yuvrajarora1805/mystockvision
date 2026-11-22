@@ -12,11 +12,31 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const DEFAULT_TIMEOUT_MS = 12000;
 // Tried in order. The env-configured model is preferred; the rest are robust
 // fallbacks so the layer keeps working even if the configured id is wrong/retired.
-const FALLBACK_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+const FALLBACK_MODELS = [
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+  "gemini-flash-lite-latest",
+  "gemini-3.8-flash",
+  "gemini-2.5-flash",
+];
 
-/** The configured API key, or empty string if unset. */
+/** All configured API keys in priority order. */
+function apiKeys(): string[] {
+  return Array.from(
+    new Set(
+      [
+        process.env.GEMINI_API_KEY,
+        ...(process.env.GEMINI_API_KEYS || "").split(","),
+      ]
+        .map((k) => (k || "").trim())
+        .filter(Boolean)
+    )
+  );
+}
+
+/** The primary configured API key, or empty string if unset. */
 function apiKey(): string {
-  return (process.env.GEMINI_API_KEY || "").trim();
+  return apiKeys()[0] || "";
 }
 
 /** The configured Groq API key, or empty string if unset. */
@@ -127,29 +147,33 @@ export async function generateText(
   const timeoutMs = opts?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
   return withTimeout(async (signal) => {
-    // 1. Try Gemini first if key is present
-    if (apiKey().length > 0) {
-      const client = new GoogleGenerativeAI(apiKey());
+    // 1. Try Gemini first if keys are present
+    const allKeys = apiKeys();
+    if (allKeys.length > 0) {
       const candidates = workingModel ? [workingModel, ...modelCandidates().filter((m) => m !== workingModel)] : modelCandidates();
-      for (const id of candidates) {
+      for (const k of allKeys) {
         if (signal.aborted) break;
-        try {
-          const model = client.getGenerativeModel({ model: id });
-          let result;
+        const client = new GoogleGenerativeAI(k);
+        for (const id of candidates) {
+          if (signal.aborted) break;
           try {
-            result = await model.generateContent(prompt, { signal });
-          } catch (firstError) {
-            if (!/429|quota|rate.?limit/i.test(String(firstError))) throw firstError;
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            result = await model.generateContent(prompt, { signal });
+            const model = client.getGenerativeModel({ model: id });
+            let result;
+            try {
+              result = await model.generateContent(prompt, { signal });
+            } catch (firstError) {
+              if (!/429|quota|rate.?limit/i.test(String(firstError))) throw firstError;
+              await new Promise((resolve) => setTimeout(resolve, 500));
+              result = await model.generateContent(prompt, { signal });
+            }
+            const text = (result.response.text() || "").trim();
+            if (text.length > 0) {
+              workingModel = id; // cache the first model that works for this process
+              return text;
+            }
+          } catch {
+            // Try the next candidate
           }
-          const text = (result.response.text() || "").trim();
-          if (text.length > 0) {
-            workingModel = id; // cache the first model that works for this process
-            return text;
-          }
-        } catch {
-          // Try the next candidate
         }
       }
     }

@@ -22,6 +22,7 @@ services:
     env_file:
       - ./frontend/.env.local
     environment:
+      AUDIO_DIR: /app/audio
       MYSQL_HOST: mysql
       MYSQL_USER: root
       MYSQL_PASSWORD: ffa_dev
@@ -34,6 +35,8 @@ services:
         condition: service_healthy
     ports:
       - "3003:3000"
+    volumes:
+      - ./audio:/app/audio
 
 volumes:
   mysql_data:

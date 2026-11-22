@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 import { POST } from "./route";
 
-// Mock ElevenLabs synthesis
-vi.mock("@/lib/elevenlabs", () => ({
+// Mock TTS synthesis
+vi.mock("@/lib/tts", () => ({
   synthesizeSpeech: vi.fn().mockResolvedValue({
     audioBase64: "dGVzdC1hdWRpby1ieXRlcw==",
-    mimeType: "audio/mpeg",
+    mimeType: "audio/wav",
   }),
 }));
 

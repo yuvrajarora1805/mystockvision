@@ -5,6 +5,7 @@ export type VoiceState =
   | "processing"
   | "thinking"
   | "speaking"
+  | "paused"
   | "error";
 
 export interface ChatTurn {

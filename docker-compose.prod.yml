@@ -28,6 +28,7 @@ services:
     env_file:
       - ./frontend/.env.prod
     environment:
+      AUDIO_DIR: /app/audio
       MYSQL_HOST: mysql
       MYSQL_USER: root
       MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -37,6 +38,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    volumes:
+      - ./audio:/app/audio
     # Bound to loopback only — nginx is the sole public entry point (see
     # deploy/nginx/mystockvision.conf). Publishing on all interfaces here
     # would let callers reach the app directly over plaintext HTTP,

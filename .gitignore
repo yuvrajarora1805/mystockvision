@@ -53,6 +53,13 @@ share/
 
 # Saved Docker images — large binaries, rebuilt with `docker save`.
 *.tar
+*.zip
+
+# Audio recordings and synthesized responses
+audio/*.webm
+audio/*.wav
+audio/*.mp3
+!audio/.gitkeep
 
 # Local skills & submodules
 day-trader-skill/

@@ -71,6 +71,9 @@ RUN apk add --no-cache wget
 # user that owns nothing rather than as root inside the container.
 RUN addgroup -g 1001 -S nodejs && adduser -u 1001 -S nextjs -G nodejs
 
+# Create persistent audio directory with ownership for nextjs runtime user
+RUN mkdir -p /app/audio && chown -R nextjs:nodejs /app/audio
+
 # `standalone` already contains the pruned node_modules and a server.js entry
 # point; static assets and public/ are not traced into it and must come across
 # separately.

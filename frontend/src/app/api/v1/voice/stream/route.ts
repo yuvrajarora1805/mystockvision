@@ -3,10 +3,18 @@ import { screenMemoryStore } from "@/lib/voice/screen-memory-store";
 
 export const dynamic = "force-dynamic";
 
-const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || "").trim();
-
 export async function POST(req: NextRequest) {
   try {
+    const geminiKeys = Array.from(
+      new Set(
+        [
+          process.env.GEMINI_API_KEY,
+          ...(process.env.GEMINI_API_KEYS || "").split(","),
+        ]
+          .map((k) => (k || "").trim())
+          .filter(Boolean)
+      )
+    );
     const { sessionId, message, history, screenSnapshot } = await req.json();
 
     if (!message || typeof message !== "string") {
@@ -16,7 +24,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    if (!GEMINI_API_KEY) {
+    if (geminiKeys.length === 0) {
       return new Response(JSON.stringify({ error: "Gemini API key is missing" }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
@@ -56,8 +64,9 @@ ${retrieved.groundingContext}
     }
     contents.push({ role: "user", parts: [{ text: message }] });
 
-    // Stream with gemini-flash-lite-latest / gemini-3-flash-preview
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
+    // Stream with gemini-3.5-flash-lite / gemini-flash-lite-latest
+    const activeKey = geminiKeys[0];
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse&key=${activeKey}`;
 
     const geminiRes = await fetch(geminiUrl, {
       method: "POST",
