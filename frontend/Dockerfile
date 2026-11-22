@@ -17,7 +17,7 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 # `npm ci` needs the dev dependencies: the build runs TypeScript and Tailwind.
-RUN npm ci
+RUN npm ci || npm install
 
 # ── build ────────────────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
