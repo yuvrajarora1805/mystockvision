@@ -34,7 +34,7 @@ services:
       mysql:
         condition: service_healthy
     ports:
-      - "3003:3000"
+      - "3000:3000"
     volumes:
       - ./audio:/app/audio
 
