@@ -116,5 +116,16 @@ To validate scoring changes:
 python data-pipeline/scripts/validate_scoring_engine.py --base-url http://127.0.0.1:3000
 ```
 
+## 📐 Calculation Engine & Formulas Reference
+
+For an in-depth, mathematically rigorous breakdown of all quantitative models and scoring engines, see **[FORMULAS_AND_CALCULATIONS.md](./FORMULAS_AND_CALCULATIONS.md)**.
+
+Key highlights covered in detail:
+- **Stock Comparison & Quick Winner**: Algorithmic composite score balancing SmartScore, inverted RiskScore, AI target gap, and ROE-to-P/E spread.
+- **5-Pillar Smart Score (0–5)**: Profitability (25%), Growth (20%), Valuation (20%), Momentum (20%), and Solvency (15%) combined with ML walk-forward logistic adjustments.
+- **Risk Score Engine (0–5)**: Breakdown across Financial, Technical, Sentiment, and Corporate Governance/Narrative risks.
+- **Academic Forensic Models**: Full mathematical ratios for Beneish M-Score (earnings manipulation), Altman Z-Score (bankruptcy/solvency), and Piotroski 9-point F-Score.
+- **Portfolio Forensics & Tax**: Indian Capital Gains calculations (Sections 111A/112A, 4% cess, July 2024 budget rate transition) and Herfindahl-Hirschman concentration index ($HHI$).
+
 ---
 *Disclaimer: This platform is for educational and research purposes only. None of the AI-generated reports or insights should be considered financial advice.*
